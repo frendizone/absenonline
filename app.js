@@ -20,7 +20,7 @@ const NIP_DOMAIN = "agungtex.com";
 
 let currentUser = null;
 let currentPos = null;
-let kantor = { lat: -7.544717618937254, lng: 110.89159640176129, radius: 200, nama: "Kantor" };
+let kantor = { lat: -7.544845126934041, lng: 110.89169618535372, radius: 20, nama: "Kantor" };
 
 // ============================================
 // JAM REALTIME
