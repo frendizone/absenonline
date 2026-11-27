@@ -10,7 +10,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_rt-7MMR2Kk4CFaObF4BcGA_0lL_QBbB";
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const NIP_DOMAIN = "agtex.com";
+const NIP_DOMAIN = "agungtex.com";
 
 let currentUser = null;
 let currentPos = null;
