@@ -5,10 +5,16 @@ const SUPABASE_URL = "https://yujvcpdhntanncxzopds.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_rt-7MMR2Kk4CFaObF4BcGA_0lL_QBbB";
 
 // ============================================
-// INIT SUPABASE
+// INIT SUPABASE (DIPERBAIKI)
 // ============================================
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 const NIP_DOMAIN = "agungtex.com";
 
@@ -24,7 +30,7 @@ setInterval(() => {
 }, 1000);
 
 // ============================================
-// LOGIN
+// LOGIN (DIPERBAIKI)
 // ============================================
 async function login() {
   const nip = document.getElementById("nipInput").value.trim();
@@ -57,23 +63,33 @@ async function login() {
     return;
   }
 
+  // Jeda 1 detik agar Supabase selesai menyimpan token sesi di browser
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
   await loadProfile(data.user);
   btn.disabled = false;
   btn.textContent = "Masuk";
 }
 
 // ============================================
-// PROFIL & STATE
+// PROFIL & STATE (DIPERBAIKI)
 // ============================================
 async function loadProfile(authUser) {
+  // Menggunakan maybeSingle() agar tidak error jika data kosong
   const { data: profile, error } = await db
     .from("users")
     .select("*")
     .eq("id", authUser.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !profile) {
-    alert("Profil belum terdaftar. Hubungi admin.");
+  if (error) {
+    alert("Error sistem: " + error.message);
+    await db.auth.signOut();
+    return;
+  }
+
+  if (!profile) {
+    alert("Profil belum terdaftar di tabel users. Hubungi admin.");
     await db.auth.signOut();
     return;
   }
@@ -116,7 +132,7 @@ db.auth.getSession().then(async ({ data: { session } }) => {
 // KANTOR
 // ============================================
 async function loadKantor() {
-  const { data, error } = await db.from("kantor").select("*").eq("id", 1).single();
+  const { data, error } = await db.from("kantor").select("*").eq("id", 1).maybeSingle();
   if (!error && data) kantor = data;
 }
 
