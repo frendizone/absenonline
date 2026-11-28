@@ -3,14 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Rekap Absensi</title>
+  <title>Admin - Sistem Absensi</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Tambahan style khusus tabel admin */
-    .table-responsive { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    /* CSS Tambahan untuk Tab & Tabel */
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; background: #e2e8f0; color: #475569; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .tab-btn.active { background: #2563eb; color: #fff; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #334155; }
+    select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-bottom: 12px; background: #fff; }
+    
+    .table-responsive { overflow-x: auto; margin-top: 15px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     th { background: #f1f5f9; color: #475569; }
+    
     .badge-in { background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: bold; }
     .badge-out { background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: bold; }
     .btn-export { background: #059669; margin-bottom: 15px; }
@@ -20,34 +31,92 @@
   <div class="app" style="max-width: 800px;">
     <header class="header">
       <h1>👨‍💼 Dashboard Admin</h1>
-      <p>Rekap Kehadiran Karyawan</p>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+        <a href="index.html" class="logout" style="text-decoration:none; background:#64748b; width:auto; padding:8px 14px; border-radius:8px;">🏠 Halaman Utama</a>
+        <button class="logout" onclick="logout()" style="width:auto; padding:8px 14px;">Keluar</button>
+      </div>
     </header>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2>50 Absensi Terakhir</h2>
-        <a href="index.html" class="logout" style="text-decoration:none; background:#64748b; width:auto; padding:8px 14px; border-radius:8px;">&larr; Kembali</a>
-      </div>
-      
-      <button class="btn-export" onclick="exportCSV()">📥 Download Rekap (CSV)</button>
+    <!-- NAVIGASI TAB -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tabRekap', this)">📋 Rekap Absensi</button>
+      <button class="tab-btn" onclick="switchTab('tabKaryawan', this)">👥 Kelola Karyawan</button>
+    </div>
 
-      <div class="table-responsive">
-        <table id="tabelAbsensi">
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Nama</th>
-              <th>NIP</th>
-              <th>Tipe</th>
-              <th>Jarak</th>
-            </tr>
-          </thead>
-          <tbody id="listAbsensi">
-            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
-          </tbody>
-        </table>
+    <!-- ========================================== -->
+    <!-- TAB 1: REKAP ABSENSI                       -->
+    <!-- ========================================== -->
+    <div id="tabRekap" class="tab-content active">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>50 Absensi Terakhir</h2>
+        </div>
+        <button class="btn-export" onclick="exportCSV()">📥 Download Rekap (CSV)</button>
+        <div class="table-responsive">
+          <table id="tabelAbsensi">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Nama</th>
+                <th>NIP</th>
+                <th>Tipe</th>
+                <th>Jarak</th>
+              </tr>
+            </thead>
+            <tbody id="listAbsensi">
+              <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: KELOLA KARYAWAN                     -->
+    <!-- ========================================== -->
+    <div id="tabKaryawan" class="tab-content">
+      <div class="card">
+        <h2>Tambah Karyawan Baru</h2>
+        <div class="form-group">
+          <label>NIP (Angka/ID)</label>
+          <input type="text" id="newNip" placeholder="Contoh: 1002" />
+        </div>
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="newNama" placeholder="Contoh: Budi Santoso" />
+        </div>
+        <div class="form-group">
+          <label>Level / Jabatan</label>
+          <select id="newRole">
+            <option value="staff">Staff</option>
+            <option value="karyawan produksi">Karyawan Produksi</option>
+            <option value="kepala produksi">Kepala Produksi</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+        <button onclick="tambahKaryawan()" id="btnSimpan">Simpan Karyawan</button>
+        <p id="statusMsg" style="margin-top:10px; font-size:13px; font-weight:bold;"></p>
+      </div>
+
+      <div class="card">
+        <h2>Daftar Karyawan</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>NIP</th>
+                <th>Nama</th>
+                <th>Jabatan</th>
+              </tr>
+            </thead>
+            <tbody id="listKaryawan">
+              <tr><td colspan="3" style="text-align:center;">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -55,31 +124,58 @@
     // GANTI DENGAN URL & KEY SUPABASE ANDA
     const SUPABASE_URL = "https://yujvcpdhntanncxzopds.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_rt-7MMR2Kk4CFaObF4BcGA_0lL_QBbB";
+    const NIP_DOMAIN = "agungtex.com";
 
     const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true }
-    });
-
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true } });
     let dataAbsensi = [];
 
-    // Cek login & Role
+    // ============================================
+    // 1. CEK LOGIN & ROLE ADMIN
+    // ============================================
     db.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) return (location.href = "index.html");
-
-      // Cek apakah role-nya admin
+      
       const { data: profile } = await db.from("users").select("role").eq("id", session.user.id).single();
       
-      if (profile?.role !== "admin") {
+      // Hanya ijinkan admin atau manager masuk ke halaman ini
+      if (profile?.role !== "admin" && profile?.role !== "manager") {
         alert("Akses Ditolak! Anda bukan Admin.");
         return (location.href = "index.html");
       }
-
-      // Jika admin, ambil semua data absensi
-      loadData();
+      
+      // Load data awal
+      loadRekapAbsensi();
+      loadDaftarKaryawan();
     });
 
-    async function loadData() {
+    // ============================================
+    // 2. FUNGSI PINDAH TAB
+    // ============================================
+    function switchTab(tabId, btnElement) {
+      // Sembunyikan semua konten tab
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      // Hapus class active dari semua tombol
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      // Tampilkan tab yang dipilih
+      document.getElementById(tabId).classList.add('active');
+      btnElement.classList.add('active');
+    }
+
+    // ============================================
+    // 3. FUNGSI LOGOUT
+    // ============================================
+    async function logout() {
+      if (!confirm("Yakin ingin keluar?")) return;
+      await db.auth.signOut();
+      location.href = "index.html";
+    }
+
+    // ============================================
+    // 4. FUNGSI TAB 1: REKAP ABSENSI
+    // ============================================
+    async function loadRekapAbsensi() {
       const { data, error } = await db
         .from("absensi")
         .select("*, users(nama, nip)")
@@ -110,7 +206,6 @@
       `).join("");
     }
 
-    // Fungsi Download CSV (Bisa dibuka di Excel)
     function exportCSV() {
       if (dataAbsensi.length === 0) return alert("Tidak ada data untuk didownload");
       
@@ -122,12 +217,84 @@
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
+      link.setAttribute("href", URL.createObjectURL(blob));
       link.setAttribute("download", `rekap_absensi_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    // ============================================
+    // 5. FUNGSI TAB 2: KELOLA KARYAWAN
+    // ============================================
+    async function loadDaftarKaryawan() {
+      const { data } = await db.from("users").select("*").order("nama");
+      const tbody = document.getElementById("listKaryawan");
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada karyawan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(u => `
+        <tr>
+          <td><strong>${u.nip}</strong></td>
+          <td>${u.nama}</td>
+          <td style="text-transform: capitalize;">${u.role}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function tambahKaryawan() {
+      const nip = document.getElementById("newNip").value.trim();
+      const nama = document.getElementById("newNama").value.trim();
+      const role = document.getElementById("newRole").value;
+      const btn = document.getElementById("btnSimpan");
+      const msg = document.getElementById("statusMsg");
+
+      if (!nip || !nama) return alert("NIP dan Nama wajib diisi!");
+
+      btn.disabled = true;
+      btn.textContent = "Memproses...";
+      msg.textContent = "";
+
+      const email = `${nip}@${NIP_DOMAIN}`;
+      const defaultPassword = "123456"; // Password default
+
+      try {
+        // Daftarkan ke Supabase Auth
+        const { data: authData, error: authError } = await db.auth.signUp({
+          email: email,
+          password: defaultPassword,
+        });
+
+        if (authError) throw new Error("Gagal buat akun: " + authError.message);
+
+        // Masukkan ke tabel users
+        const { error: dbError } = await db.from("users").insert({
+          id: authData.user.id,
+          nip: nip,
+          nama: nama,
+          role: role,
+          email: email
+        });
+
+        if (dbError) throw new Error("Gagal simpan profil: " + dbError.message);
+
+        msg.style.color = "green";
+        msg.innerHTML = `✅ Berhasil! Karyawan <b>${nama}</b> ditambahkan.<br>Password default: <b>${defaultPassword}</b>`;
+        
+        document.getElementById("newNip").value = "";
+        document.getElementById("newNama").value = "";
+        loadDaftarKaryawan();
+
+      } catch (error) {
+        msg.style.color = "red";
+        msg.textContent = "❌ " + error.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Simpan Karyawan";
+      }
     }
   </script>
 </body>
